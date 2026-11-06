@@ -94,7 +94,9 @@ class Interval:
 
     # Returns the midpoint of the interval
     def midpoint(self):
-        return (self.x0 + self.x1) / 2
+        total = self.x0 + self.x1
+        # Integer endpoints must not round the sample onto an excluded endpoint.
+        return frac(total) / 2 if isinstance(total, numbers.Rational) else total / 2
 
     # Returns true if the interval contains the point x
     def contains(self, x):
@@ -899,6 +901,10 @@ class RationalFunction:
     # ------------------------------------------------------------------
 
     def at(self, x):
+        # Constant integer polynomials never reach Sympy substitution below.
+        # Python's integer division would round distinct rational bounds together.
+        if isinstance(self.num, numbers.Rational) and isinstance(self.den, numbers.Rational):
+            return frac(self.num) / frac(self.den)
         f = self.num / self.den
         if isinstance(f, numbers.Number):
             return f
